@@ -23,16 +23,18 @@ import (
 	_ "time"
 )
 
-// Variables used for command line parameters
+// Token Variables used for command line parameters
 var (
 	Token string
 )
 
+// init Initializes the bot
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
 }
 
+// main The main function, that involves connecting to discord and setting up message events.
 func main() {
 	// Extract and store birthdays from the JSON config file
 	commands.ExtractBirthdays()
@@ -49,10 +51,12 @@ func main() {
 
 		// Check the person's birthday against current day
 		if birthdayUtil.IsBirthdayCurrentDay(int(month), day) && name != "Casey" {
-			bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is %s's birthday! Please wish them a happy birthday!", name))
+			_, err := bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is %s's birthday! Please wish them a happy birthday!", name))
+			birthdayUtil.Check(err)
 		} else if birthdayUtil.IsBirthdayCurrentDay(1, 6) {
 			// Special handling for Casey
-			bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is the anniversary of the Capitol Riots. Nothing else special happened today."))
+			_, err := bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is the anniversary of the Capitol Riots. Nothing else special happened today."))
+			birthdayUtil.Check(err)
 		}
 	}
 
@@ -61,11 +65,12 @@ func main() {
 
 	// Wait here until CTRL-C or other term signal is received.
 	waitUntilTermination()
-	bot.Close()
+	err = bot.Close()
+	birthdayUtil.Check(err)
 	fmt.Println("Bot terminated.")
 }
 
-// Connect starts a Discord session
+// Connect This function starts a Discord session.
 func Connect(discordToken string) (*discordgo.Session, error) {
 	session, err := discordgo.New("Bot " + discordToken)
 	birthdayUtil.Check(err)
@@ -76,6 +81,7 @@ func Connect(discordToken string) (*discordgo.Session, error) {
 	return session, err
 }
 
+// waitUntilTermination This function listens for the user to use Ctrl+C to terminate the session.
 func waitUntilTermination() {
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
