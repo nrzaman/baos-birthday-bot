@@ -21,7 +21,10 @@ func ExtractBirthdays() {
 	content, err := os.Open("./config/birthdays.json")
 	birthdayUtil.Check(err)
 
-	defer content.Close()
+	defer func(content *os.File) {
+		err := content.Close()
+		birthdayUtil.Check(err)
+	}(content)
 
 	// Read all contents
 	byteResult, _ := io.ReadAll(content)
@@ -30,7 +33,8 @@ func ExtractBirthdays() {
 	var people birthdayUtil.People
 
 	// Store contents
-	json.Unmarshal(byteResult, &people)
+	err = json.Unmarshal(byteResult, &people)
+	birthdayUtil.Check(err)
 	Birthdays = people
 }
 
@@ -66,7 +70,8 @@ func MessageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 		}
 
 		// Send the message to the channel
-		bot.ChannelMessageSend("962434955680579624", buffer.String())
+		_, err := bot.ChannelMessageSend("962434955680579624", buffer.String())
+		birthdayUtil.Check(err)
 	}
 
 	// Build the string that contains the list of all configured birthdays
@@ -81,6 +86,7 @@ func MessageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 		}
 
 		// Send the message to the channel
-		bot.ChannelMessageSend("962434955680579624", buffer.String())
+		_, err := bot.ChannelMessageSend("962434955680579624", buffer.String())
+		birthdayUtil.Check(err)
 	}
 }
