@@ -9,7 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	_ "github.com/bwmarrin/discordgo"
 	"github.com/nrzaman/baos-birthday-bot/birthdayUtil"
-	_ "github.com/nrzaman/baos-birthday-bot/birthdayUtil"
+	"github.com/nrzaman/baos-birthday-bot/commands"
 	_ "io/ioutil"
 	_ "net/http"
 	"os"
@@ -35,13 +35,13 @@ func init() {
 
 func main() {
 	// Extract and store birthdays from the JSON config file
-	ExtractBirthdays()
+	commands.ExtractBirthdays()
 
 	// Create a new Discord session using the provided bot token.
 	bot, err := Connect(Token)
 	birthdayUtil.Check(err)
 
-	for _, person := range birthdays.People {
+	for _, person := range commands.Birthdays.People {
 		// Get each person's name and date of birth
 		name := person.Name
 		month := time.Month(person.Birthday.Month)
@@ -57,7 +57,7 @@ func main() {
 	}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
-	bot.AddHandler(MessageCreate)
+	bot.AddHandler(commands.MessageCreate)
 
 	// Wait here until CTRL-C or other term signal is received.
 	waitUntilTermination()
