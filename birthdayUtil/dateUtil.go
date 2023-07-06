@@ -2,7 +2,7 @@ package birthdayUtil
 
 import "time"
 
-func isCurrentDayABirthday(month int, day int) bool {
+func IsBirthdayCurrentDay(month int, day int) bool {
 	now := time.Now()
 	currentMonth := now.Month()
 	currentDay := now.Day()
