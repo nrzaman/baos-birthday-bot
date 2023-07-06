@@ -17,3 +17,14 @@ type Person struct {
 type People struct {
 	People []Person `json:"Birthdays"`
 }
+
+// Channel A struct containing the channel name and ID.
+type Channel struct {
+	Name string `json:"Name"`
+	ID   string `json:"ID"`
+}
+
+// Channels A struct containing an array of channels.
+type Channels struct {
+	Channel []Channel `json:"Channels"`
+}

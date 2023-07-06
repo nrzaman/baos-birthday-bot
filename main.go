@@ -33,6 +33,8 @@ func init() {
 func main() {
 	// Extract and store birthdays from the JSON config file
 	util.ExtractBirthdays()
+	// Extract and store channel IDs from the JSON config file
+	util.ExtractChannels()
 
 	// Create a new Discord session using the provided bot token.
 	bot, err := discord.Connect(Token)

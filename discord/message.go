@@ -22,7 +22,7 @@ func MessageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 	if message.Content == "!month" {
 		fmt.Println("Listing the current month's birthdays.")
 		// Send the message to the channel
-		_, err := bot.ChannelMessageSend("962434955680579624", ListCurrentMonthBirthdays())
+		_, err := bot.ChannelMessageSend(message.ChannelID, ListCurrentMonthBirthdays())
 		util.Check(err)
 	}
 
@@ -30,7 +30,7 @@ func MessageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 	if message.Content == "!all" {
 		fmt.Println("Listing all birthdays.")
 		// Send the message to the channel
-		_, err := bot.ChannelMessageSend("962434955680579624", ListAllBirthdays())
+		_, err := bot.ChannelMessageSend(message.ChannelID, ListAllBirthdays())
 		util.Check(err)
 	}
 }
@@ -38,7 +38,7 @@ func MessageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 // SendBirthdayMessage This function will send a birthday message to the discord if today is a birthday.
 func SendBirthdayMessage(bot *discordgo.Session, birthdayMessage string) {
 	if len(birthdayMessage) != 0 {
-		_, err := bot.ChannelMessageSend("962434955680579624", birthdayMessage)
+		_, err := bot.ChannelMessageSend(util.GeneralChannelID, birthdayMessage)
 		util.Check(err)
 	}
 }
@@ -50,11 +50,11 @@ func ListCurrentMonthBirthdays() string {
 
 	// Build the string that contains the list of birthdays for the next 2 months
 	var buffer bytes.Buffer
-	for i := 0; i < len(util.Birthdays.People); i++ {
+	for _, person := range util.Birthdays.People {
 		// Extract the name and date of birth
-		name := util.Birthdays.People[i].Name
-		month := time.Month(util.Birthdays.People[i].Birthday.Month)
-		day := util.Birthdays.People[i].Birthday.Day
+		name := person.Name
+		month := time.Month(person.Birthday.Month)
+		day := person.Birthday.Day
 
 		// Check whether the birthday is within the current month and next month, and add
 		// to the string buffer if so
@@ -69,10 +69,10 @@ func ListCurrentMonthBirthdays() string {
 // ListAllBirthdays Lists all birthdays.
 func ListAllBirthdays() string {
 	var buffer bytes.Buffer
-	for i := 0; i < len(util.Birthdays.People); i++ {
-		name := util.Birthdays.People[i].Name
-		month := time.Month(util.Birthdays.People[i].Birthday.Month)
-		day := strconv.Itoa(util.Birthdays.People[i].Birthday.Day)
+	for _, person := range util.Birthdays.People {
+		name := person.Name
+		month := time.Month(person.Birthday.Month)
+		day := strconv.Itoa(person.Birthday.Day)
 		buffer.WriteString(name + ", " + month.String() + " " + day + "\n")
 	}
 

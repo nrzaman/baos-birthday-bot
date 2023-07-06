@@ -3,8 +3,6 @@ package util
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"os"
 	"time"
 )
 
@@ -13,23 +11,14 @@ var Birthdays People
 // ExtractBirthdays This function extracts birthdays from the JSON config file and stores them
 // to be referenced later.
 func ExtractBirthdays() {
-	// Open the JSON config file
-	content, err := os.Open("./config/birthdays.json")
-	Check(err)
-
-	defer func(content *os.File) {
-		err := content.Close()
-		Check(err)
-	}(content)
-
 	// Read all contents
-	byteResult, _ := io.ReadAll(content)
+	var byteResult = Extract("./config/birthdays.json")
 
 	// Create result variable
 	var people People
 
 	// Store contents
-	err = json.Unmarshal(byteResult, &people)
+	var err = json.Unmarshal(byteResult, &people)
 	Check(err)
 	Birthdays = people
 }

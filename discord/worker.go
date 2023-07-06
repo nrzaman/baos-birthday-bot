@@ -33,7 +33,7 @@ func Worker(bot *discordgo.Session) {
 		if time.Now().Day() == 1 {
 			var buffer bytes.Buffer
 			buffer.WriteString("Happy " + time.Now().Month().String() + "! Below are all the birthdays this month:\n" + ListCurrentMonthBirthdays())
-			_, err := bot.ChannelMessageSend("962434955680579624", buffer.String())
+			_, err := bot.ChannelMessageSend(util.GeneralChannelID, buffer.String())
 			util.Check(err)
 		}
 
