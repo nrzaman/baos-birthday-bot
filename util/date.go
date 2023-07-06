@@ -1,4 +1,4 @@
-package birthdayUtil
+package util
 
 import "time"
 

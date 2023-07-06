@@ -1,4 +1,4 @@
-package birthdayUtil
+package util
 
 // Birthday A struct containing the month and day of a birthday.
 type Birthday struct {

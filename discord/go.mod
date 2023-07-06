@@ -1,4 +1,4 @@
-module github.com/nrzaman/baos-birthday-bot
+module github.com/nrzaman/baos-birthday-bot/discord
 
 go 1.20
 
@@ -9,11 +9,8 @@ require (
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/nrzaman/baos-birthday-bot/discord v0.0.0-00010101000000-000000000000 // indirect
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 )
 
-replace github.com/nrzaman/baos-birthday-bot/util => ./util
-
-replace github.com/nrzaman/baos-birthday-bot/discord => ./discord
+replace github.com/nrzaman/baos-birthday-bot/util => ../util
