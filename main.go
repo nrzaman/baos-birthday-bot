@@ -9,6 +9,7 @@ import (
 	"fmt"
 	_ "fmt"
 	"github.com/bwmarrin/discordgo"
+	_ "github.com/bwmarrin/discordgo"
 	"io"
 	_ "io/ioutil"
 	"log"
@@ -23,8 +24,6 @@ import (
 	_ "syscall"
 	"time"
 	_ "time"
-
-	_ "github.com/bwmarrin/discordgo"
 )
 
 // Variables used for command line parameters
@@ -71,45 +70,43 @@ func ExtractBirthdays() {
 
 	var people People
 
-	//Store contents
+	// Store contents
 	json.Unmarshal(byteResult, &people)
 	birthdays = people
 }
 
 func main() {
-	// Create a new Discord session using the provided bot token.
-	//dg, err := discordgo.New("Bot " + Token)
-	//check(err)
 	// Extract and store birthdays from the JSON config file
 	ExtractBirthdays()
 
+	// Create a new Discord session using the provided bot token.
 	bot, err := Connect(Token)
 	check(err)
+
+	// Retrieve current time to compare birthdays to
+	//now := time.Now()
+	//currentMonth := now.Month()
+	//currentDay := now.Day()
+
+	//for _, person := range birthdays.People {
+	//name := person.Name
+	//month := time.Month(person.Birthday.Month)
+	//day := person.Birthday.Day
+
+	//if isCurrentDayABirthday(int(month), day) && name != "Casey" {
+	//	bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is %s's birthday! Please wish them a happy birthday!", name))
+	//} else if int(currentMonth) == 1 && currentDay == 6 {
+	//	bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is the anniversary of the Capitol Riots. Nothing else special happened today."))
+	//}
+	//}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	bot.AddHandler(messageCreate)
 
-	// Retrieve current time to compare birthdays to
-	now := time.Now()
-	currentMonth := now.Month()
-	currentDay := now.Day()
-
-	for _, person := range birthdays.People {
-		name := person.Name
-		month := time.Month(person.Birthday.Month)
-		day := person.Birthday.Day
-
-		if int(month) == int(currentMonth) && day == currentDay && name != "Casey" {
-			bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is %s's birthday! Please wish them a happy birthday!", name))
-		} else if int(currentMonth) == 1 && currentDay == 6 {
-			bot.ChannelMessageSend("962434955680579624", fmt.Sprintf("Today is the anniversary of the Capitol Riots. Nothing else special happened today."))
-		}
-	}
-
-	// Cleanly close down the Discord session.
-	defer bot.Close()
 	// Wait here until CTRL-C or other term signal is received.
 	waitUntilTermination()
+	bot.Close()
+	fmt.Println("Bot terminated.")
 }
 
 // Connect starts a Discord session
@@ -117,7 +114,7 @@ func Connect(discordToken string) (*discordgo.Session, error) {
 	session, err := discordgo.New("Bot " + discordToken)
 	check(err)
 
-	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildMessageReactions | discordgo.IntentsDirectMessages | discordgo.IntentsDirectMessageReactions
+	session.Identify.Intents = discordgo.IntentsGuildMessages | discordgo.IntentsGuilds | discordgo.IntentsMessageContent
 	// Open a websocket connection to Discord and begin listening.
 	err = session.Open()
 	return session, err
@@ -142,6 +139,7 @@ func messageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 	}
 
 	if message.Content == "!upcoming" {
+		fmt.Println("Listing upcoming birthdays.")
 		// Retrieve current time to compare birthdays to
 		now := time.Now()
 		currentMonth := now.Month()
@@ -158,11 +156,12 @@ func messageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 		}
 
 		// Send the message to the channel
-		bot.ChannelMessageSend(message.ChannelID, buffer.String())
+		bot.ChannelMessageSend("962434955680579624", buffer.String())
 	}
 
 	// Build the string that contains the list of all configured birthdays
 	if message.Content == "!all" {
+		fmt.Println("Listing all birthdays.")
 		var buffer bytes.Buffer
 		for i := 0; i < len(birthdays.People); i++ {
 			name := birthdays.People[i].Name
@@ -172,6 +171,6 @@ func messageCreate(bot *discordgo.Session, message *discordgo.MessageCreate) {
 		}
 
 		// Send the message to the channel
-		bot.ChannelMessageSend(message.ChannelID, buffer.String())
+		bot.ChannelMessageSend("962434955680579624", buffer.String())
 	}
 }
