@@ -6,7 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/nrzaman/baos-birthday-bot/internal/birthday"
-	"github.com/nrzaman/baos-birthday-bot/internal/bot"
+	bot "github.com/nrzaman/baos-birthday-bot/internal/discord"
 )
 
 // MockDiscordClient is a mock implementation of DiscordClient for testing
