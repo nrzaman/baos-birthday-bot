@@ -21,9 +21,17 @@
 go.work
 
 bin
+bot
 
 .idea
 
 config
 
 .DS_Store
+
+# Backup of old code
+old_code/
+
+# Old refactored utilities (replaced by internal/)
+util/interfaces.go
+util/birthday_service.go
