@@ -13,11 +13,11 @@ import (
 // Handler handles Discord message events with injected dependencies
 type Handler struct {
 	client          interfaces.DiscordClient
-	birthdayService *birthday.Service
+	birthdayService birthday.BirthdayService
 }
 
 // NewHandler creates a new Handler with the given dependencies
-func NewHandler(client interfaces.DiscordClient, birthdayService *birthday.Service) *Handler {
+func NewHandler(client interfaces.DiscordClient, birthdayService birthday.BirthdayService) *Handler {
 	return &Handler{
 		client:          client,
 		birthdayService: birthdayService,
@@ -64,50 +64,6 @@ func (h *Handler) HandleSlashCommand(s *discordgo.Session, i *discordgo.Interact
 	})
 	if err != nil {
 		fmt.Printf("Error responding to slash command: %v\n", err)
-	}
-}
-
-// HandleMessage processes incoming Discord messages (backward compatibility for !commands)
-func (h *Handler) HandleMessage(bot *discordgo.Session, message *discordgo.MessageCreate) {
-	// Ignore all messages created by the bot itself
-	if message.Author.ID == bot.State.User.ID {
-		return
-	}
-
-	// Lists upcoming birthday for the current month
-	if message.Content == "!month" {
-		fmt.Println("Legacy command: Listing the current month's birthdays.")
-		response := h.birthdayService.ListCurrentMonthBirthdays()
-		if response == "" {
-			response = "No birthdays this month! (Tip: Use /month for slash commands)"
-		}
-		if err := h.client.SendMessage(message.ChannelID, response); err != nil {
-			fmt.Printf("Error sending message: %v\n", err)
-		}
-	}
-
-	// Build the string that contains the list of all configured birthdays
-	if message.Content == "!all" {
-		fmt.Println("Legacy command: Listing all birthdays.")
-		response := h.birthdayService.ListAllBirthdays()
-		if response == "" {
-			response = "No birthdays configured! (Tip: Use /all for slash commands)"
-		}
-		if err := h.client.SendMessage(message.ChannelID, response); err != nil {
-			fmt.Printf("Error sending message: %v\n", err)
-		}
-	}
-
-	// Next birthday
-	if message.Content == "!next" {
-		fmt.Println("Legacy command: Finding next birthday.")
-		response := h.getNextBirthday()
-		if response == "" {
-			response = "No upcoming birthdays found! (Tip: Use /next for slash commands)"
-		}
-		if err := h.client.SendMessage(message.ChannelID, response); err != nil {
-			fmt.Printf("Error sending message: %v\n", err)
-		}
 	}
 }
 
@@ -159,14 +115,14 @@ func (h *Handler) getNextBirthday() string {
 
 	// Get the next birthday (or multiple if on same day)
 	next := upcoming[0]
-	result := fmt.Sprintf("Next birthday: %s on %s %d", next.name, next.month.String(), next.day)
+	result := fmt.Sprintf("**Next birthday:** %s on %s %d", next.name, next.month.String(), next.day)
 
 	if next.daysUntil == 0 {
 		result += " (Today! 🎉)"
 	} else if next.daysUntil == 1 {
 		result += " (Tomorrow!)"
 	} else {
-		result += fmt.Sprintf(" (in %d days)", next.daysUntil)
+		result += fmt.Sprintf(" (in %d days!)", next.daysUntil)
 	}
 
 	// Check if there are multiple birthdays on the same day

@@ -4,9 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
-	"github.com/nrzaman/baos-birthday-bot/internal/birthday"
 	bot "github.com/nrzaman/baos-birthday-bot/internal/discord"
+	"github.com/nrzaman/baos-birthday-bot/util"
 )
 
 // MockDiscordClient is a mock implementation of DiscordClient for testing
@@ -56,26 +55,52 @@ func (m *MockTimeProvider) Day() int {
 	return m.CurrentTime.Day()
 }
 
-// MockFileReader for testing
-type MockFileReader struct {
-	Data map[string][]byte
-	Err  error
+// MockBirthdayService for testing
+type MockBirthdayService struct {
+	BirthdayMessage       string
+	CurrentMonthBirthdays string
+	AllBirthdays          string
+	Birthdays             []struct {
+		Name  string
+		Month int
+		Day   int
+	}
 }
 
-func (m *MockFileReader) ReadFile(path string) ([]byte, error) {
-	if m.Err != nil {
-		return nil, m.Err
+func (m *MockBirthdayService) IsBirthdayToday(month int, day int) bool {
+	return false
+}
+
+func (m *MockBirthdayService) GetBirthdayMessage() string {
+	return m.BirthdayMessage
+}
+
+func (m *MockBirthdayService) ListCurrentMonthBirthdays() string {
+	return m.CurrentMonthBirthdays
+}
+
+func (m *MockBirthdayService) ListAllBirthdays() string {
+	return m.AllBirthdays
+}
+
+func (m *MockBirthdayService) GetBirthdays() util.People {
+	people := make([]util.Person, len(m.Birthdays))
+	for i, b := range m.Birthdays {
+		people[i] = util.Person{
+			Name: b.Name,
+			Birthday: util.Birthday{
+				Month: b.Month,
+				Day:   b.Day,
+			},
+		}
 	}
-	return m.Data[path], nil
+	return util.People{People: people}
 }
 
 func TestSendBirthdayMessage(t *testing.T) {
 	// Arrange
 	mockClient := &MockDiscordClient{}
-	mockTime := &MockTimeProvider{}
-	mockFileReader := &MockFileReader{}
-
-	birthdayService := birthday.NewService(mockTime, mockFileReader)
+	birthdayService := &MockBirthdayService{}
 	handler := bot.NewHandler(mockClient, birthdayService)
 
 	tests := []struct {
@@ -120,164 +145,4 @@ func TestSendBirthdayMessage(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestHandleMessage_MonthCommand(t *testing.T) {
-	// Arrange
-	mockClient := &MockDiscordClient{}
-	mockTime := &MockTimeProvider{
-		CurrentTime: time.Date(2024, time.March, 15, 10, 0, 0, 0, time.UTC),
-	}
-
-	birthdaysJSON := `{
-		"Birthdays": [
-			{"Name": "Alice", "Birthday": {"Month": 3, "Day": 15}},
-			{"Name": "Bob", "Birthday": {"Month": 4, "Day": 20}}
-		]
-	}`
-
-	mockFileReader := &MockFileReader{
-		Data: map[string][]byte{
-			"./config/birthdays.json": []byte(birthdaysJSON),
-		},
-	}
-
-	birthdayService := birthday.NewService(mockTime, mockFileReader)
-	err := birthdayService.LoadBirthdays("./config/birthdays.json")
-	if err != nil {
-		t.Fatalf("Failed to load birthdays: %v", err)
-	}
-
-	handler := bot.NewHandler(mockClient, birthdayService)
-
-	// Create mock Discord message
-	session := &discordgo.Session{}
-	session.State = discordgo.NewState()
-	session.State.User = &discordgo.User{ID: "bot123"}
-	message := &discordgo.MessageCreate{
-		Message: &discordgo.Message{
-			Content:   "!month",
-			ChannelID: "channel456",
-			Author:    &discordgo.User{ID: "user789"},
-		},
-	}
-
-	// Act
-	handler.HandleMessage(session, message)
-
-	// Assert
-	if len(mockClient.SentMessages) != 1 {
-		t.Fatalf("Expected 1 message sent, got %d", len(mockClient.SentMessages))
-	}
-
-	sent := mockClient.SentMessages[0]
-	if sent.ChannelID != "channel456" {
-		t.Errorf("Message sent to channel %q; want 'channel456'", sent.ChannelID)
-	}
-
-	// Should only include March birthdays
-	if !contains(sent.Message, "Alice") {
-		t.Errorf("Response should include Alice (March birthday)")
-	}
-	if contains(sent.Message, "Bob") {
-		t.Errorf("Response should not include Bob (April birthday)")
-	}
-}
-
-func TestHandleMessage_AllCommand(t *testing.T) {
-	// Arrange
-	mockClient := &MockDiscordClient{}
-	mockTime := &MockTimeProvider{}
-
-	birthdaysJSON := `{
-		"Birthdays": [
-			{"Name": "Alice", "Birthday": {"Month": 3, "Day": 15}},
-			{"Name": "Bob", "Birthday": {"Month": 4, "Day": 20}}
-		]
-	}`
-
-	mockFileReader := &MockFileReader{
-		Data: map[string][]byte{
-			"./config/birthdays.json": []byte(birthdaysJSON),
-		},
-	}
-
-	birthdayService := birthday.NewService(mockTime, mockFileReader)
-	err := birthdayService.LoadBirthdays("./config/birthdays.json")
-	if err != nil {
-		t.Fatalf("Failed to load birthdays: %v", err)
-	}
-
-	handler := bot.NewHandler(mockClient, birthdayService)
-
-	// Create mock Discord message
-	session := &discordgo.Session{}
-	session.State = discordgo.NewState()
-	session.State.User = &discordgo.User{ID: "bot123"}
-	message := &discordgo.MessageCreate{
-		Message: &discordgo.Message{
-			Content:   "!all",
-			ChannelID: "channel456",
-			Author:    &discordgo.User{ID: "user789"},
-		},
-	}
-
-	// Act
-	handler.HandleMessage(session, message)
-
-	// Assert
-	if len(mockClient.SentMessages) != 1 {
-		t.Fatalf("Expected 1 message sent, got %d", len(mockClient.SentMessages))
-	}
-
-	sent := mockClient.SentMessages[0]
-
-	// Should include all birthdays
-	if !contains(sent.Message, "Alice") || !contains(sent.Message, "Bob") {
-		t.Errorf("Response should include both Alice and Bob")
-	}
-}
-
-func TestHandleMessage_IgnoresBotMessages(t *testing.T) {
-	// Arrange
-	mockClient := &MockDiscordClient{}
-	mockTime := &MockTimeProvider{}
-	mockFileReader := &MockFileReader{}
-
-	birthdayService := birthday.NewService(mockTime, mockFileReader)
-	handler := bot.NewHandler(mockClient, birthdayService)
-
-	// Create mock Discord message from the bot itself
-	session := &discordgo.Session{}
-	session.State = discordgo.NewState()
-	session.State.User = &discordgo.User{ID: "bot123"}
-	message := &discordgo.MessageCreate{
-		Message: &discordgo.Message{
-			Content:   "!month",
-			ChannelID: "channel456",
-			Author:    &discordgo.User{ID: "bot123"}, // Same as bot's ID
-		},
-	}
-
-	// Act
-	handler.HandleMessage(session, message)
-
-	// Assert
-	if len(mockClient.SentMessages) != 0 {
-		t.Errorf("Bot should ignore its own messages, but sent %d messages", len(mockClient.SentMessages))
-	}
-}
-
-// Helper function
-func contains(s, substr string) bool {
-	return len(s) > 0 && len(substr) > 0 && findSubstring(s, substr)
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }

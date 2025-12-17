@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/bwmarrin/discordgo v0.27.1
-	github.com/nrzaman/baos-birthday-bot/util v0.0.0-20251217002710-9ad4420e01e7
+	github.com/mattn/go-sqlite3 v1.14.32
 )
 
 require (

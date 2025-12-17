@@ -25,9 +25,13 @@ bot
 
 .idea
 
-config
+config/birthdays.json
+config/channels.json
 
 .DS_Store
+
+# Environment variables (secrets)
+.env
 
 # Backup of old code
 old_code/
@@ -35,3 +39,7 @@ old_code/
 # Old refactored utilities (replaced by internal/)
 util/interfaces.go
 util/birthday_service.go
+
+# Database files
+*.db
+/migrate

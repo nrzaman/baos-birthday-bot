@@ -10,21 +10,11 @@ type Birthday struct {
 type Person struct {
 	Name     string   `json:"Name"`
 	Birthday Birthday `json:"Birthday"`
+	Gender   *string  `json:"Gender"`
 }
 
 // People A struct containing an array of persons (includes their first name
 // and birthday).
 type People struct {
 	People []Person `json:"Birthdays"`
-}
-
-// Channel A struct containing the channel name and ID.
-type Channel struct {
-	Name string `json:"Name"`
-	ID   string `json:"ID"`
-}
-
-// Channels A struct containing an array of channels.
-type Channels struct {
-	Channel []Channel `json:"Channels"`
 }

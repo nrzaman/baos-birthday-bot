@@ -28,18 +28,37 @@ brew install kubectl
 ```
 brew install helm
 ```
+- Copy and update your own `birthdays.json` file using the provided example to build the database
+```bash
+cp ./config/birthdays-example.json ./config/birthdays.json
+```
 
 #### Set environment variables
 1. Grab a [Discord Bot Token](https://discordgsm.com/guide/how-to-get-a-discord-bot-token) from your Discord server.
 2. Grab a [Discord Channel ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID#h_01HRSTXPS5FMK2A5SMVSX4JW4E) from the Discord channel that you'd like the bot to post reminders to.
+3. Create a `.env` file in the root directory:
+```bash
+cp .env.example .env
+```
+4. Edit `.env` and add your values:
+```bash
+DISCORD_BOT_TOKEN=your_bot_token_here
+DISCORD_CHANNEL_ID=your_channel_id_here
+```
 
 ### 2. Build and Run
 ```bash
-# Build the code
+# Build the db migration tool
+go build -o migrate ./cmd/migrate
+
+# Run the migration (one-time setup)
+./migrate -json ./config/birthdays.json -db ./birthdays.db
+
+# Build the bot
 go build -o bot .
 
-# Run the bot
-./bot -t [DISCORD_TOKEN]
+# Run the bot (make sure .env is configured first)
+source .env && ./bot
 ```
 
 ### 3. Discord Slash Commands
@@ -49,8 +68,8 @@ go build -o bot .
 **Example:**
 ```
 User: /month
-Bot: Alice, March 15
-     Bob, March 20
+Bot: Alice, January 25
+     Benjamin, January 31
 ```
 
 ---
@@ -61,9 +80,9 @@ Bot: Alice, March 15
 **Example:**
 ```
 User: /all
-Bot: Alice, March 15
-     Bob, March 20
-     Charlotte, April 21
+Bot: Alice, January 25
+     Bob, June 10
+     Cassidy, December 2
      ... (all birthdays)
 ```
 
@@ -75,7 +94,7 @@ Bot: Alice, March 15
 **Example:**
 ```
 User: /next
-Bot: Next birthday: Alice on March 15 (in 3 days)
+Bot: Next birthday: Alice on January 25 (in 3 days)
 ```
 
 **Special cases:**

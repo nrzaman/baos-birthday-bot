@@ -13,11 +13,6 @@ type TimeProvider interface {
 	Day() int
 }
 
-// FileReader provides file reading functionality that can be mocked in tests
-type FileReader interface {
-	ReadFile(path string) ([]byte, error)
-}
-
 // DiscordClient provides Discord-related functionality that can be mocked in tests
 type DiscordClient interface {
 	SendMessage(channelID string, message string) error
