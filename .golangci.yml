@@ -17,9 +17,14 @@ linters-settings:
     check-type-assertions: true
     check-blank: false  # Allow _ = pattern for intentionally ignored errors
     exclude-functions:
-      - (io.Closer).Close  # Allow ignoring Close() errors in defers
+      - (*os.File).Close  # Allow ignoring Close() errors for file handles
 
 issues:
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-rules:
+    - path: util/JSONReader.go
+      linters:
+        - errcheck
+      text: "Error return value of.*Close.*is not checked"
