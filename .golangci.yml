@@ -15,7 +15,9 @@ linters:
 linters-settings:
   errcheck:
     check-type-assertions: true
-    check-blank: true
+    check-blank: false  # Allow _ = pattern for intentionally ignored errors
+    exclude-functions:
+      - (io.Closer).Close  # Allow ignoring Close() errors in defers
 
 issues:
   exclude-use-default: false
