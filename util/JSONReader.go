@@ -11,7 +11,7 @@ func Extract(configFile string) []byte {
 	Check(err)
 
 	defer func(content *os.File) {
-		_ = content.Close() // Best effort close, error handled by Check(err) above if needed
+		_ = content.Close() //nolint:errcheck // Best effort close on read-only file
 	}(content)
 
 	// Read all contents
