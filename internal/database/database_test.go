@@ -8,17 +8,20 @@ import (
 
 // Helper function to create an in-memory test database
 func setupTestDB(t *testing.T) *database.DB {
+	t.Helper()
 	// Use :memory: for in-memory database (perfect for tests!)
 	db, err := database.New(":memory:")
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
+	t.Cleanup(func() {
+		_ = db.Close() // Best effort close in tests
+	})
 	return db
 }
 
 func TestAddAndGetBirthday(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
 	expected_month := 1
 	expected_day := 25
 
@@ -58,7 +61,6 @@ func TestAddAndGetBirthday(t *testing.T) {
 
 func TestGetBirthdaysByMonth(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
 	expected_month_alice_ben := 1
 	expected_day_alice := 25
 	expected_day_ben := 31
@@ -66,9 +68,9 @@ func TestGetBirthdaysByMonth(t *testing.T) {
 	expected_day_cassidy := 2
 
 	// Add multiple birthdays
-	db.AddBirthday("Alice", expected_month_alice_ben, expected_day_alice, nil, nil)
-	db.AddBirthday("Bob", expected_month_alice_ben, expected_day_ben, nil, nil)
-	db.AddBirthday("Cassidy", expected_month_cassidy, expected_day_cassidy, nil, nil)
+	_ = db.AddBirthday("Alice", expected_month_alice_ben, expected_day_alice, nil, nil)
+	_ = db.AddBirthday("Bob", expected_month_alice_ben, expected_day_ben, nil, nil)
+	_ = db.AddBirthday("Cassidy", expected_month_cassidy, expected_day_cassidy, nil, nil)
 
 	// Get March birthdays
 	birthdays, err := db.GetBirthdaysByMonth(expected_month_alice_ben)
@@ -83,16 +85,15 @@ func TestGetBirthdaysByMonth(t *testing.T) {
 
 func TestGetBirthdaysByDate(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
 	expected_month_alice := 1
 	expected_day_alice := 25
 	expected_month_bruce_cassidy := 12
 	expected_day_bruce_cassidy := 2
 
 	// Add birthdays
-	db.AddBirthday("Alice", expected_month_alice, expected_day_alice, nil, nil)
-	db.AddBirthday("Bruce", expected_month_bruce_cassidy, expected_day_bruce_cassidy, nil, nil) // Same day!
-	db.AddBirthday("Cassidy", expected_month_bruce_cassidy, expected_day_bruce_cassidy, nil, nil)
+	_ = db.AddBirthday("Alice", expected_month_alice, expected_day_alice, nil, nil)
+	_ = db.AddBirthday("Bruce", expected_month_bruce_cassidy, expected_day_bruce_cassidy, nil, nil) // Same day!
+	_ = db.AddBirthday("Cassidy", expected_month_bruce_cassidy, expected_day_bruce_cassidy, nil, nil)
 
 	// Get birthdays on March 15
 	birthdays, err := db.GetBirthdaysByDate(expected_month_bruce_cassidy, expected_day_bruce_cassidy)
@@ -107,12 +108,11 @@ func TestGetBirthdaysByDate(t *testing.T) {
 
 func TestUpdateBirthday(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
 	expected_month_alice := 1
 	expected_day_alice := 25
 
 	// Add a birthday
-	db.AddBirthday("Alice", expected_month_alice, expected_day_alice, nil, nil)
+	_ = db.AddBirthday("Alice", expected_month_alice, expected_day_alice, nil, nil)
 
 	// Update it
 	gender := "female"
@@ -133,10 +133,9 @@ func TestUpdateBirthday(t *testing.T) {
 
 func TestDeleteBirthday(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
 
 	// Add a birthday
-	db.AddBirthday("Alice", 1, 25, nil, nil)
+	_ = db.AddBirthday("Alice", 1, 25, nil, nil)
 
 	// Delete it
 	err := db.DeleteBirthday("Alice")

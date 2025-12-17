@@ -28,10 +28,14 @@ func (m *MockTimeProvider) Day() int {
 
 // Helper function to create test database
 func setupTestDB(t *testing.T) *database.DB {
+	t.Helper()
 	db, err := database.New(":memory:")
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
+	t.Cleanup(func() {
+		_ = db.Close() // Best effort close in tests
+	})
 	return db
 }
 
@@ -46,7 +50,6 @@ func addTestBirthday(t *testing.T, db *database.DB, name string, month, day int,
 func TestGetBirthdayMessage_NoBirthdays(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	timeProvider := &MockTimeProvider{
 		CurrentTime: time.Date(2025, 3, 15, 10, 0, 0, 0, time.UTC),
@@ -65,7 +68,6 @@ func TestGetBirthdayMessage_NoBirthdays(t *testing.T) {
 func TestGetBirthdayMessage_SingleBirthdayMale(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	addTestBirthday(t, db, "John", 3, 15, &male)
@@ -93,7 +95,6 @@ func TestGetBirthdayMessage_SingleBirthdayMale(t *testing.T) {
 func TestGetBirthdayMessage_SingleBirthdayFemale(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	female := "female"
 	addTestBirthday(t, db, "Alice", 3, 15, &female)
@@ -118,7 +119,6 @@ func TestGetBirthdayMessage_SingleBirthdayFemale(t *testing.T) {
 func TestGetBirthdayMessage_SingleBirthdayNonbinary(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	nonbinary := "nonbinary"
 	addTestBirthday(t, db, "Taylor", 3, 15, &nonbinary)
@@ -143,7 +143,6 @@ func TestGetBirthdayMessage_SingleBirthdayNonbinary(t *testing.T) {
 func TestGetBirthdayMessage_CaseyOnJanuary6th(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	addTestBirthday(t, db, "Casey", 1, 6, &male)
@@ -171,7 +170,6 @@ func TestGetBirthdayMessage_CaseyOnJanuary6th(t *testing.T) {
 func TestGetBirthdayMessage_CaseyOnOtherDay(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	// Casey's birthday is actually 1/6, but we're testing a different day
@@ -197,7 +195,6 @@ func TestGetBirthdayMessage_CaseyOnOtherDay(t *testing.T) {
 func TestGetBirthdayMessage_January6thWithOtherPeople(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	female := "female"
@@ -229,7 +226,6 @@ func TestGetBirthdayMessage_January6thWithOtherPeople(t *testing.T) {
 func TestGetBirthdayMessage_MultipleBirthdays(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	female := "female"
@@ -262,7 +258,6 @@ func TestGetBirthdayMessage_MultipleBirthdays(t *testing.T) {
 func TestIsBirthdayToday_True(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	timeProvider := &MockTimeProvider{
 		CurrentTime: time.Date(2025, 3, 15, 10, 0, 0, 0, time.UTC),
@@ -281,7 +276,6 @@ func TestIsBirthdayToday_True(t *testing.T) {
 func TestIsBirthdayToday_False(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	timeProvider := &MockTimeProvider{
 		CurrentTime: time.Date(2025, 3, 15, 10, 0, 0, 0, time.UTC),
@@ -300,7 +294,6 @@ func TestIsBirthdayToday_False(t *testing.T) {
 func TestListCurrentMonthBirthdays_WithBirthdays(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	female := "female"
@@ -334,7 +327,6 @@ func TestListCurrentMonthBirthdays_WithBirthdays(t *testing.T) {
 func TestListCurrentMonthBirthdays_NoBirthdays(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	timeProvider := &MockTimeProvider{
 		CurrentTime: time.Date(2025, 3, 1, 10, 0, 0, 0, time.UTC),
@@ -353,7 +345,6 @@ func TestListCurrentMonthBirthdays_NoBirthdays(t *testing.T) {
 func TestListAllBirthdays_MultipleBirthdays(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	female := "female"
@@ -396,7 +387,6 @@ func TestListAllBirthdays_MultipleBirthdays(t *testing.T) {
 func TestListAllBirthdays_NoBirthdays(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	timeProvider := &MockTimeProvider{
 		CurrentTime: time.Date(2025, 1, 1, 10, 0, 0, 0, time.UTC),
@@ -415,7 +405,6 @@ func TestListAllBirthdays_NoBirthdays(t *testing.T) {
 func TestGetBirthdays_ReturnsCorrectFormat(t *testing.T) {
 	// Arrange
 	db := setupTestDB(t)
-	defer db.Close()
 
 	male := "male"
 	addTestBirthday(t, db, "John", 3, 15, &male)

@@ -38,13 +38,13 @@ func New(dbPath string) (*DB, error) {
 
 	// Enable foreign keys
 	if _, err := conn.Exec("PRAGMA foreign_keys = ON"); err != nil {
-		conn.Close()
+		_ = conn.Close() // Best effort close on error
 		return nil, fmt.Errorf("failed to enable foreign keys: %w", err)
 	}
 
 	// Initialize schema
 	if _, err := conn.Exec(schema); err != nil {
-		conn.Close()
+		_ = conn.Close() // Best effort close on error
 		return nil, fmt.Errorf("failed to initialize schema: %w", err)
 	}
 
@@ -93,7 +93,9 @@ func (db *DB) GetAllBirthdays() ([]Birthday, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query birthdays: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close() // Best effort close
+	}()
 
 	var birthdays []Birthday
 	for rows.Next() {
@@ -116,7 +118,9 @@ func (db *DB) GetBirthdaysByMonth(month int) ([]Birthday, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query birthdays by month: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close() // Best effort close
+	}()
 
 	var birthdays []Birthday
 	for rows.Next() {
@@ -139,7 +143,9 @@ func (db *DB) GetBirthdaysByDate(month, day int) ([]Birthday, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query birthdays by date: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close() // Best effort close
+	}()
 
 	var birthdays []Birthday
 	for rows.Next() {
