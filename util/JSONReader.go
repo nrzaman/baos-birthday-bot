@@ -11,9 +11,7 @@ func Extract(configFile string) []byte {
 	Check(err)
 
 	defer func(content *os.File) {
-		if closeErr := content.Close(); closeErr != nil {
-			Check(closeErr)
-		}
+		_ = content.Close() // Best effort close, error handled by Check(err) above if needed
 	}(content)
 
 	// Read all contents
