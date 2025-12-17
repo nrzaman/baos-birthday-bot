@@ -1,4 +1,4 @@
-# Baos Birthday Bot
+# Baos Birthday Bot 🎉
 
 This bot will automatically post birthday reminders of people in the How Bout Baos Discord server. It will post reminders at the beginning of every month, including all of the birthdays for that month, and on the day of each person's birthday.
 
