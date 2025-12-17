@@ -12,14 +12,14 @@ import (
 // Worker handles scheduled birthday checks
 type Worker struct {
 	client          interfaces.DiscordClient
-	birthdayService *birthday.Service
+	birthdayService birthday.BirthdayService
 	timeProvider    interfaces.TimeProvider
 	channelID       string
 	stopChan        chan struct{}
 }
 
 // NewWorker creates a new Worker with the given dependencies
-func NewWorker(client interfaces.DiscordClient, birthdayService *birthday.Service, timeProvider interfaces.TimeProvider, channelID string) *Worker {
+func NewWorker(client interfaces.DiscordClient, birthdayService birthday.BirthdayService, timeProvider interfaces.TimeProvider, channelID string) *Worker {
 	return &Worker{
 		client:          client,
 		birthdayService: birthdayService,
@@ -72,7 +72,13 @@ func (w *Worker) performDailyCheck() {
 	// List the monthly birthdays if it is the first of the month
 	if now.Day() == 1 {
 		var buffer bytes.Buffer
-		buffer.WriteString("Happy " + now.Month().String() + "! Below are all the birthdays this month:\n" + w.birthdayService.ListCurrentMonthBirthdays())
+		response := w.birthdayService.ListCurrentMonthBirthdays()
+		buffer.WriteString("Happy " + now.Month().String() + "! 🙌 ")
+		if response != "" {
+			buffer.WriteString("Below are all the birthdays this month:\n" + response)
+		} else {
+			buffer.WriteString("\nThere are no birthdays this month. See you next month! 🫡")
+		}
 		if err := w.client.SendMessage(w.channelID, buffer.String()); err != nil {
 			fmt.Printf("Error sending monthly birthday message: %v\n", err)
 		}

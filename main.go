@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -10,49 +9,40 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/nrzaman/baos-birthday-bot/internal/birthday"
-	"github.com/nrzaman/baos-birthday-bot/internal/channel"
+	"github.com/nrzaman/baos-birthday-bot/internal/database"
 	bot "github.com/nrzaman/baos-birthday-bot/internal/discord"
 	"github.com/nrzaman/baos-birthday-bot/internal/interfaces"
 	"github.com/nrzaman/baos-birthday-bot/internal/providers"
 )
 
-// Token Variables used for command line parameters
-var (
-	Token string
-)
-
-// init Initializes the bot
-func init() {
-	flag.StringVar(&Token, "t", "", "Bot Token")
-	flag.Parse()
-}
-
 // main The main function with dependency injection
 func main() {
+	// Load configuration from environment variables
+	discordToken := os.Getenv("DISCORD_BIRTHDAY_BOT_TOKEN")
+	if discordToken == "" {
+		log.Fatal("DISCORD_BIRTHDAY_BOT_TOKEN environment variable is required")
+	}
+
+	generalChannelID := os.Getenv("DISCORD_BIRTHDAY_CHANNEL_ID")
+	if generalChannelID == "" {
+		log.Fatal("DISCORD_BIRTHDAY_CHANNEL_ID environment variable is required")
+	}
+
 	// Create real implementations of our dependencies
 	timeProvider := &providers.RealTimeProvider{}
-	fileReader := &providers.RealFileReader{}
+
+	// Open database
+	db, err := database.New("./birthdays.db")
+	if err != nil {
+		log.Fatalf("Failed to open database: %v", err)
+	}
+	defer db.Close()
 
 	// Create services with injected dependencies
-	birthdayService := birthday.NewService(timeProvider, fileReader)
-	channelService := channel.NewService(fileReader)
-
-	// Load configuration
-	if err := birthdayService.LoadBirthdays("./config/birthdays.json"); err != nil {
-		log.Fatalf("Failed to load birthdays: %v", err)
-	}
-
-	if err := channelService.LoadChannels("./config/channels.json"); err != nil {
-		log.Fatalf("Failed to load channels: %v", err)
-	}
-
-	generalChannelID := channelService.GetGeneralChannelID()
-	if generalChannelID == "" {
-		log.Fatal("General channel ID not found")
-	}
+	birthdayService := birthday.NewServiceDB(timeProvider, db)
 
 	// Create Discord session
-	session, err := discordgo.New("Bot " + Token)
+	session, err := discordgo.New("Bot " + discordToken)
 	if err != nil {
 		log.Fatalf("Failed to create Discord session: %v", err)
 	}
@@ -64,9 +54,6 @@ func main() {
 
 	// Create handler with dependencies
 	handler := bot.NewHandler(discordClient, birthdayService)
-
-	// Register message handler (for legacy !commands)
-	session.AddHandler(handler.HandleMessage)
 
 	// Register slash command handler
 	session.AddHandler(handler.HandleSlashCommand)

@@ -1,0 +1,28 @@
+{
+  "Birthdays": [
+    {
+      "Name": "Alice",
+      "Birthday": {
+        "Month": 1,
+        "Day": 25
+      },
+      "Gender": "female"
+    },
+    {
+      "Name": "Bob",
+      "Birthday": {
+        "Month": 6,
+        "Day": 10
+      },
+      "Gender": "male"
+    },
+    {
+      "Name": "Cassidy",
+      "Birthday": {
+        "Month": 12,
+        "Day": 2
+      },
+      "Gender": "nonbinary"
+    }
+  ]
+}
