@@ -98,9 +98,9 @@ func TestGetChannelByName(t *testing.T) {
 	}
 
 	tests := []struct {
-		name         string
-		channelName  string
-		expectedID   string
+		name        string
+		channelName string
+		expectedID  string
 	}{
 		{"Get general channel", "general", "123456789"},
 		{"Get random channel", "random", "987654321"},

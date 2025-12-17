@@ -143,7 +143,10 @@ func TestHandleMessage_MonthCommand(t *testing.T) {
 	}
 
 	birthdayService := birthday.NewService(mockTime, mockFileReader)
-	birthdayService.LoadBirthdays("./config/birthdays.json")
+	err := birthdayService.LoadBirthdays("./config/birthdays.json")
+	if err != nil {
+		t.Fatalf("Failed to load birthdays: %v", err)
+	}
 
 	handler := bot.NewHandler(mockClient, birthdayService)
 
@@ -200,7 +203,10 @@ func TestHandleMessage_AllCommand(t *testing.T) {
 	}
 
 	birthdayService := birthday.NewService(mockTime, mockFileReader)
-	birthdayService.LoadBirthdays("./config/birthdays.json")
+	err := birthdayService.LoadBirthdays("./config/birthdays.json")
+	if err != nil {
+		t.Fatalf("Failed to load birthdays: %v", err)
+	}
 
 	handler := bot.NewHandler(mockClient, birthdayService)
 
