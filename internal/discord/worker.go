@@ -73,9 +73,15 @@ func (w *Worker) performDailyCheck() {
 	if now.Day() == 1 {
 		var buffer bytes.Buffer
 		response := w.birthdayService.ListCurrentMonthBirthdays()
-		buffer.WriteString("Happy " + now.Month().String() + "! 🙌 ")
+		buffer.WriteString("Happy ")
+		// Special handling for January to account for New Year's messaging
+		if now.Month() == 1 {
+			buffer.WriteString("New Year and January! 🎊 ")
+		} else {
+			buffer.WriteString(now.Month().String() + "! 🙌 ")
+		}
 		if response != "" {
-			buffer.WriteString("Below are all the birthdays this month:\n" + response)
+			buffer.WriteString("\nBelow are all of the birthdays this month:\n" + response)
 		} else {
 			buffer.WriteString("\nThere are no birthdays this month. See you next month! 🫡")
 		}
