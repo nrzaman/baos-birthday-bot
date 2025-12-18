@@ -1,0 +1,97 @@
+# Default values for baos-birthday-bot Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Docker image configuration
+image:
+  # Repository where the image is stored
+  # Options:
+  #   - Docker Hub: nrzaman/baos-birthday-bot
+  #   - Nexus: nexus.your-cluster.com/baos-birthday-bot (if using private registry)
+  repository: "nrzaman/baos-birthday-bot"
+  pullPolicy: IfNotPresent
+  tag: "v1.0.0"
+
+# Image pull secrets (only needed for private registries like Nexus)
+imagePullSecrets: []
+  # - name: nexus-registry-secret
+
+# Discord bot credentials
+# IMPORTANT: These should be set via --set flags or a separate values file
+# Example: helm install --set discord.token="your-token" --set discord.channelId="your-channel-id"
+discord:
+  # Discord bot token - REQUIRED
+  token: ""
+  # Discord channel ID where messages will be sent - REQUIRED
+  channelId: ""
+
+# Number of bot replicas (usually 1 for Discord bots to avoid duplicate messages)
+replicaCount: 1
+
+# Resource limits and requests (Go bot is more lightweight than Java)
+resources:
+  limits:
+    cpu: 200m      # 0.2 CPU cores
+    memory: 128Mi  # 128 MB RAM
+  requests:
+    cpu: 50m       # 0.05 CPU cores
+    memory: 64Mi   # 64 MB RAM
+
+# Pod restart policy
+restartPolicy: Always
+
+# Timezone for the bot
+timezone: "America/New_York"
+
+# Security context for the pod
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+# Node selector for pod placement (optional)
+nodeSelector: {}
+
+# Tolerations for pod scheduling (optional)
+tolerations: []
+
+# Affinity rules for pod scheduling (optional)
+affinity: {}
+
+# Liveness probe configuration
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+  exec:
+    command:
+      - pgrep
+      - -f
+      - bot
+
+# Readiness probe configuration
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  exec:
+    command:
+      - pgrep
+      - -f
+      - bot
+
+# Database persistence
+database:
+  # Path inside the container
+  path: "/app/data/birthdays.db"
+  # Persistent storage for the database
+  persistence:
+    enabled: true
+    existingClaim: name
+    # Uncomment to specify storage class
+    # storageClassName: "standard"

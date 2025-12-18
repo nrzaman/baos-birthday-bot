@@ -28,7 +28,7 @@ brew install kubectl
 ```
 brew install helm
 ```
-- Copy and update your own `birthdays.json` file using the provided example to build the database
+- Copy and update your own `birthdays.json` file using the provided example to build the database:
 ```bash
 cp ./config/birthdays-example.json ./config/birthdays.json
 ```
@@ -42,23 +42,36 @@ cp .env.example .env
 ```
 4. Edit `.env` and add your values:
 ```bash
-DISCORD_BOT_TOKEN=your_bot_token_here
-DISCORD_CHANNEL_ID=your_channel_id_here
+export DISCORD_BIRTHDAY_BOT_TOKEN=your_bot_token_here
+export DISCORD_BIRTHDAY_CHANNEL_ID=your_channel_id_here
+```
+5. Add the environment variables to your environment by using the below command:
+```bash
+source .env
 ```
 
-### 2. Build and Run
+### 2. Build and Run (Quickstart)
 ```bash
-# Build the db migration tool
-go build -o migrate ./cmd/migrate
-
-# Run the migration (one-time setup)
-./migrate -json ./config/birthdays.json -db ./birthdays.db
+# Run the db migration (first time or whenever data changes)
+make migrate
 
 # Build the bot
-go build -o bot .
+make build
 
-# Run the bot (make sure .env is configured first)
-source .env && ./bot
+# Ensure Docker / colima is running
+make colima-start
+
+# Build the Docker image with a version tag
+make docker-build VERSION=[VERSION NUMBER]
+
+# Run the bot in Docker
+make docker-run
+
+# Stop the bot in Docker
+make docker-stop
+
+# List all make commands
+make help
 ```
 
 ### 3. Discord Slash Commands
@@ -94,7 +107,7 @@ Bot: Alice, January 25
 **Example:**
 ```
 User: /next
-Bot: Next birthday: Alice on January 25 (in 3 days)
+Bot: Next birthday: Alice on January 25 (in 3 days!)
 ```
 
 **Special cases:**
@@ -104,19 +117,8 @@ Bot: Next birthday: Alice on January 25 (in 3 days)
 
 ---
 
-#### Backward Compatibility
-
-The bot still supports legacy text commands:
-
-| Slash Command | Legacy Command |
-|---------------|----------------|
-| `/month` | `!month` |
-| `/all` | `!all` |
-| `/next` | `!next` |
-
-**Note:** Legacy commands will show a tip to use slash commands instead.
-
 ### 4. Deployment
+
 Please note that this bot is currently deployed on an in-house server running a Kubernetes cluster.
 The below steps assume a similar setup.
 
@@ -126,24 +128,40 @@ The below steps assume a similar setup.
 ```bash
 kubectl get po
 ```
-3. Create `baos-birthday-bot-values.yml` in the root directory by typing:
+3. Create `baos-birthday-bot.yml` in the root directory by typing:
 ```bash
-vim baos-birthday-bot-values.yml
+vim baos-birthday-bot.yml
 ```
-4. Add the following information to `baos-birthday-bot-values.yml` and save it
+4. Add the following information to `baos-birthday-bot.yml` and save it
 ```bash
 discord:
   # Discord bot token - REQUIRED
   token: "[DISCORD TOKEN]"
   # Discord channel ID where messages will be sent - REQUIRED
   channelId: "[DISCORD CHANNEL ID]"
+
+# Database persistence - disabled for now (NFS provisioner not available)
+# The database will be in the container filesystem
+database:
+  persistence:
+    enabled: true
+    existingClaim: discord-birthday
 ```
 
 #### Deployment Steps
 1. Run the following commands in a Terminal window from the root `baos-birthday-bot` directory:
 
 ```bash
-# Build the JAR file
+# First time or whenever birthday data changes: Run the db migration (first time or whenever the birthday data has been updated)
+make migrate
+
+# First time or whenever birthday data changes: Specify the Kubernetes pod where the data will live
+POD=$(kubectl get pod -n default -l app=baos-birthday-bot -o jsonpath='{.items[0].metadata.name}')
+
+# First time or whenever birthday data changes: Copy the db into the pod
+kubectl cp birthdays.db default/$POD:/app/data/birthdays.db
+
+# Build the executable
 make build
 
 # Build the Docker image with a version tag
@@ -156,7 +174,7 @@ make docker-push VERSION=[VERSION NUMBER]
 2. Update `./helm/values.yaml` under the `image:` section, next to `tag:` to match the version number specified above 
 3. Run the following command to deploy:
 ```bash
-helm upgrade --install aos-birthday-bot ./helm --values baos-birthday-bot.yml
+helm upgrade --install baos-birthday-bot ./helm --values baos-birthday-bot.yml
 ```
 4. Verify deployment by running the following command and observing that `baos-birthday-bot` exists in the list of services running and reads `1/1` under the `READY` column:
 ```bash
@@ -179,8 +197,7 @@ kubectl logs baos-birthday-bot-[IDENTIFIER]
 
 ### Building in VS Code, unrecognized dependencies
 1. Open the Command Palette in VS Code by using the keyboard shortcut `Cmd + Shift + P`.
-2. Run the following command: `Java: Reload Projects`.
-3. If the above command does not resolve the issue, please try the following command: `Java: Clean Java Language Server Workspace`.
+2. Run the following command: `Go: Install/Update Tools`.
 
 ### Docker command not found
 

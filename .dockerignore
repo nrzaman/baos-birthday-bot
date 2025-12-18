@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+.env.example
+
+# Binaries
+bot
+migrate
+*.exe
+
+# Database files (will be mounted via volume)
+*.db
+data/
+
+# Documentation
+*.md
+
+# Test files
+*_test.go
+
+# IDE
+.idea
+.vscode
+
+# macOS
+.DS_Store
+
+# Old code backups
+old_code/
+
+# Config examples (actual configs via env vars)
+config/birthdays.json
+config/channels.json
+config/birthdays-example.json
+baos-birthday-bot-values.yml

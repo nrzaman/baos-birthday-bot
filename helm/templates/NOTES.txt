@@ -1,0 +1,52 @@
+Baos Birthday Bot has been deployed!
+
+Release Name: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+To check the status of your deployment:
+  kubectl get deployment {{ .Chart.Name }} -n {{ .Release.Namespace }}
+
+To view the bot logs:
+  kubectl logs -f deployment/{{ .Chart.Name }} -n {{ .Release.Namespace }}
+
+To check if the pod is running:
+  kubectl get pods -l app={{ .Chart.Name }} -n {{ .Release.Namespace }}
+
+The bot will:
+- Send birthday reminders on the day of each birthday
+- Send a monthly list of birthdays on the 1st of each month
+- Respond to Discord slash commands:
+    /all - Show all birthdays
+    /month - Show this month's birthdays
+    /next - Show the next upcoming birthday
+
+Configuration:
+- Discord Channel ID: {{ .Values.discord.channelId }}
+- Image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+- Timezone: {{ .Values.timezone }}
+- Replicas: {{ .Values.replicaCount }}
+- Database: {{ .Values.database.path }}
+{{- if .Values.database.persistence.enabled }}
+- Persistent Storage: {{ .Values.database.persistence.size }} ({{ .Values.database.persistence.accessMode }})
+
+To view the PersistentVolumeClaim:
+  kubectl get pvc {{ .Chart.Name }}-data -n {{ .Release.Namespace }}
+{{- end }}
+
+{{- if not .Values.image.repository }}
+
+WARNING: Image repository is not set!
+Please update values.yaml with your Docker image repository.
+{{- end }}
+
+{{- if not .Values.discord.token }}
+
+WARNING: Discord token is not set!
+The bot will not be able to connect to Discord.
+{{- end }}
+
+{{- if not .Values.discord.channelId }}
+
+WARNING: Discord channel ID is not set!
+The bot will not know where to send messages.
+{{- end }}

@@ -43,3 +43,15 @@ util/birthday_service.go
 # Database files
 *.db
 /migrate
+
+# Docker data directory
+data/
+
+# Kubernetes sensitive files
+helm/birthday-bot/values-production.yaml
+k8s/secret-production.yaml
+kubeconfig
+*.kubeconfig
+
+baos-birthday-bot.yml
+baos-birthday-bot-values.yml
