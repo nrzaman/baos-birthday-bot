@@ -10,7 +10,7 @@ image:
   #   - Nexus: nexus.your-cluster.com/baos-birthday-bot (if using private registry)
   repository: "nrzaman/baos-birthday-bot"
   pullPolicy: IfNotPresent
-  tag: "v1.0.0"
+  tag: "v1.0.1"
 
 # Image pull secrets (only needed for private registries like Nexus)
 imagePullSecrets: []
