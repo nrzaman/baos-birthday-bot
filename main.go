@@ -31,8 +31,14 @@ func main() {
 	// Create real implementations of our dependencies
 	timeProvider := &providers.RealTimeProvider{}
 
+	// Get database path from environment variable or use default
+	dbPath := os.Getenv("DATABASE_PATH")
+	if dbPath == "" {
+		dbPath = "./birthdays.db"
+	}
+
 	// Open database
-	db, err := database.New("./birthdays.db")
+	db, err := database.New(dbPath)
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)
 	}

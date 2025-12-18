@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  birthday-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: baos-birthday-bot
+    restart: unless-stopped
+    environment:
+      - DISCORD_BIRTHDAY_BOT_TOKEN=${DISCORD_BIRTHDAY_BOT_TOKEN}
+      - DISCORD_BIRTHDAY_CHANNEL_ID=${DISCORD_BIRTHDAY_CHANNEL_ID}
+      - DATABASE_PATH=/app/data/birthdays.db
+    volumes:
+      # Mount database directory to persist data
+      - ./data:/app/data
+    # Optional: Add healthcheck
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "bot"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: baos-birthday-bot
+description: A Discord bot that reminds users about upcoming birthdays
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - discord
+  - bot
+  - birthday
+  - baos
+maintainers:
+  - name: NaibenGPT
