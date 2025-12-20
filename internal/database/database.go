@@ -143,9 +143,7 @@ func (db *DB) GetBirthdaysByDate(month, day int) ([]Birthday, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query birthdays by date: %w", err)
 	}
-	defer func() {
-		_ = rows.Close() // Best effort close
-	}()
+	defer rows.Close()
 
 	var birthdays []Birthday
 	for rows.Next() {
@@ -212,7 +210,7 @@ func (b *Birthday) GetPronoun(subjectForm bool) string {
 		if subjectForm {
 			return "he"
 		}
-		return "his"
+		return "him"
 	case "female":
 		if subjectForm {
 			return "she"
@@ -220,13 +218,13 @@ func (b *Birthday) GetPronoun(subjectForm bool) string {
 		return "her"
 	case "nonbinary", "other":
 		if subjectForm {
-			return "they"
+			return "them"
 		}
 		return "their"
 	default:
 		if subjectForm {
 			return "they"
 		}
-		return "their"
+		return "them"
 	}
 }
