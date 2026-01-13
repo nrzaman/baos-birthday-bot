@@ -2,8 +2,8 @@ apiVersion: v2
 name: baos-birthday-bot
 description: A Discord bot that reminds users about upcoming birthdays
 type: application
-version: 1.0.3
-appVersion: "1.0.3"
+version: 1.0.4
+appVersion: "1.0.4"
 keywords:
   - discord
   - bot
