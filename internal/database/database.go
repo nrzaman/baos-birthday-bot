@@ -143,7 +143,9 @@ func (db *DB) GetBirthdaysByDate(month, day int) ([]Birthday, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query birthdays by date: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close() // Best effort close
+	}()
 
 	var birthdays []Birthday
 	for rows.Next() {
