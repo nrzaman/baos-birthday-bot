@@ -202,7 +202,7 @@ func (b *Birthday) GetPronoun(subjectForm bool) string {
 		if subjectForm {
 			return "they"
 		}
-		return "their"
+		return "them"
 	}
 
 	switch *b.Gender {
@@ -218,9 +218,9 @@ func (b *Birthday) GetPronoun(subjectForm bool) string {
 		return "her"
 	case "nonbinary", "other":
 		if subjectForm {
-			return "them"
+			return "they"
 		}
-		return "their"
+		return "them"
 	default:
 		if subjectForm {
 			return "they"

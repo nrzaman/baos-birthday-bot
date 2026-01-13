@@ -158,13 +158,13 @@ func TestGetPronoun(t *testing.T) {
 		expected    string
 	}{
 		{"Male subject", stringPtr("male"), true, "he"},
-		{"Male possessive", stringPtr("male"), false, "his"},
+		{"Male possessive", stringPtr("male"), false, "him"},
 		{"Female subject", stringPtr("female"), true, "she"},
 		{"Female possessive", stringPtr("female"), false, "her"},
 		{"Nonbinary subject", stringPtr("nonbinary"), true, "they"},
-		{"Nonbinary possessive", stringPtr("nonbinary"), false, "their"},
+		{"Nonbinary possessive", stringPtr("nonbinary"), false, "them"},
 		{"Nil subject", nil, true, "they"},
-		{"Nil possessive", nil, false, "their"},
+		{"Nil possessive", nil, false, "them"},
 	}
 
 	for _, tt := range tests {

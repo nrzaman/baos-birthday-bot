@@ -84,8 +84,8 @@ func TestGetBirthdayMessage_SingleBirthdayMale(t *testing.T) {
 	if !strings.Contains(message, "John") {
 		t.Errorf("Expected message to contain 'John', got: %q", message)
 	}
-	if !strings.Contains(message, "his") {
-		t.Errorf("Expected message to use 'his' pronoun for male, got: %q", message)
+	if !strings.Contains(message, "him") {
+		t.Errorf("Expected message to use 'him' pronoun for male, got: %q", message)
 	}
 	if !strings.Contains(message, "🎉") {
 		t.Errorf("Expected message to contain celebration emoji, got: %q", message)
@@ -135,8 +135,8 @@ func TestGetBirthdayMessage_SingleBirthdayNonbinary(t *testing.T) {
 	if !strings.Contains(message, "Taylor") {
 		t.Errorf("Expected message to contain 'Taylor', got: %q", message)
 	}
-	if !strings.Contains(message, "their") {
-		t.Errorf("Expected message to use 'their' pronoun for nonbinary, got: %q", message)
+	if !strings.Contains(message, "them") {
+		t.Errorf("Expected message to use 'them' pronoun for nonbinary, got: %q", message)
 	}
 }
 
@@ -247,8 +247,8 @@ func TestGetBirthdayMessage_MultipleBirthdays(t *testing.T) {
 	if !strings.Contains(message, "Alice") {
 		t.Errorf("Expected message to contain 'Alice', got: %q", message)
 	}
-	if !strings.Contains(message, "his") {
-		t.Errorf("Expected message to use 'his' for John, got: %q", message)
+	if !strings.Contains(message, "him") {
+		t.Errorf("Expected message to use 'him' for John, got: %q", message)
 	}
 	if !strings.Contains(message, "her") {
 		t.Errorf("Expected message to use 'her' for Alice, got: %q", message)
