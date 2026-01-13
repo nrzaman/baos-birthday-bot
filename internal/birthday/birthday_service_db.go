@@ -68,13 +68,16 @@ func (s *ServiceDB) ListCurrentMonthBirthdays() string {
 	}
 
 	var buffer bytes.Buffer
-	for _, birthday := range birthdays {
-		month := time.Month(birthday.Month)
-		buffer.WriteString(fmt.Sprintf("**%s Birthdays:**\n\n• %s, %s %s\n",
-			month.String(),
-			birthday.Name,
-			month.String(),
-			strconv.Itoa(birthday.Day)))
+	if len(birthdays) > 0 {
+		month := time.Month(birthdays[0].Month)
+		buffer.WriteString(fmt.Sprintf("**%s Birthdays:**\n\n",
+			month.String()))
+		for _, birthday := range birthdays {
+			buffer.WriteString(fmt.Sprintf("• %s, %s %s\n",
+				birthday.Name,
+				month.String(),
+				strconv.Itoa(birthday.Day)))
+		}
 	}
 
 	return buffer.String()
